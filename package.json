@@ -9,10 +9,14 @@
     "build": "tsc && copyup ./src/*.yaml ./src/**/*.yaml dist"
   },
   "dependencies": {
-    "lodash": "^4.17.11",
-    "cors": "^2.8.5",
-    "express": "^4.16.4",
     "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "db-migrate": "^0.11.12",
+    "db-migrate-mysql": "^2.1.2",
+    "express": "^4.16.4",
+    "http-status": "^1.5.0",
+    "lodash": "^4.17.21",
+    "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
