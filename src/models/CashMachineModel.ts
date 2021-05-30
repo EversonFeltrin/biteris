@@ -6,6 +6,16 @@ interface ICashObject {
     value: number
 };
 
+interface ICashObjectResponse {
+    accountType: string,
+    account: string,
+    oldBalance: string,
+    deposit?: string,
+    withdraw?: string,
+    discontedAmount: string,
+    balance: string
+};
+
 class CashMachineModel {
     /**
      * @name Create Account
@@ -89,22 +99,24 @@ class CashMachineModel {
 
     /**
      * @name Deposit
+     * @description Deposit value into account
      * @param data Deposit data (account, value)
      * @param type Account type
      * @author Everson F. Feltrin
      * @since 2021-05-29
      */
-    async deposit (data: ICashObject, type: string) {  
+    async deposit(data: ICashObject, type: string): Promise<ICashObjectResponse> {
         // VALIDATE DATA  
         if (!_.has(data, 'account')) return Promise.reject(new Error('VAL_001 - Account is required!'));
         if (!_.has(data, 'value')) return Promise.reject(new Error('VAL_002 - Value is required!'));
         if (!_.isString(data.account)) return Promise.reject(new Error('VAL_003 - Account needs to be a string!'));
         if (!_.isNumber(data.value)) return Promise.reject(new Error('VAL_003 - Value needs to be a float!'));
-        if (!_.includes(_.toString(data.value), '.')) return Promise.reject(new Error('VAL_004 - Value format incorrect!'));
         
         const { account, value } = data;        
-        let balance = 0;
+        let oldBalance = 0;
+        let newBalance = 0;
 
+        // VERIFY ACCOUNT EXIST
         const verifyAccountExist = await this.verifyAccountExist(account, type);
         if (verifyAccountExist.error) return Promise.reject(new Error('DEP_001 - Error while deposit value in account!'));
 
@@ -119,7 +131,8 @@ class CashMachineModel {
             if (saveTransaction.error) return Promise.reject(new Error('DEP_004Error while deposit value in account!'));
             if (saveTransaction.data.affectedRows <= 0) return Promise.reject(new Error('DEP_005 - Error while deposit value in account!'));
             
-            balance = value;
+            oldBalance = 0.00;
+            newBalance = value;
         }
         else {
             // SAVE TRANSACTION REGISTER
@@ -129,8 +142,9 @@ class CashMachineModel {
             if (saveTransaction.data.affectedRows <= 0) return Promise.reject(new Error('DEP_007 - Error while deposit value in account!'));
 
             // UPDATE BALANCE IN ACCOUNT
-            balance = verifyAccountExist.data[0].balance + value;
-            const updateBalance = await this.updateAccountBalance(parseInt(accountId), balance, type);
+            oldBalance = verifyAccountExist.data[0].balance;
+            newBalance = verifyAccountExist.data[0].balance + value;
+            const updateBalance = await this.updateAccountBalance(parseInt(accountId), newBalance, type);
             if (updateBalance.error) return Promise.reject(new Error('DEP_008 - Error while deposit value in account!'));
             if (updateBalance.data.affectedRows <= 0) return Promise.reject(new Error('DEP_009 - Error while deposit value in account!'));
         }
@@ -138,10 +152,64 @@ class CashMachineModel {
         return {
             accountType: type === 'poupanca' ? 'Conta Poupança' : 'Conta Corrente',
             account: account,
+            oldBalance: `B$ ${_.replace(oldBalance.toFixed(2), '.', ',')}`,
             deposit: `B$ ${_.replace(value.toFixed(2), '.', ',')}`,
             discontedAmount: `B$ 0,00`,
-            balance: `B$ ${_.replace(balance.toFixed(2), '.', ',')}`
+            balance: `B$ ${_.replace(newBalance.toFixed(2), '.', ',')}`
         };       
+    }
+
+    /**
+     * @name Withdraw
+     * @description Withdraw amount into account
+     * @param data Withdraw data (account, value)
+     * @param type Account type
+     * @author Everson F. Feltrin
+     * @since 2021-05-29
+     */
+    async withdraw(data: ICashObject, type: string): Promise<ICashObjectResponse> {
+        // VALIDATE DATA  
+        if (!_.has(data, 'account')) return Promise.reject(new Error('VAL_001 - Account is required!'));
+        if (!_.has(data, 'value')) return Promise.reject(new Error('VAL_002 - Value is required!'));
+        if (!_.isString(data.account)) return Promise.reject(new Error('VAL_003 - Account needs to be a string!'));
+        if (!_.isNumber(data.value)) return Promise.reject(new Error('VAL_003 - Value needs to be a float!'));
+
+        const { account, value } = data;
+
+        // VERIFY ACCOUNT EXIST
+        const verifyAccountExist = await this.verifyAccountExist(account, type);
+        if (verifyAccountExist.error) return Promise.reject(new Error('WIT_001 - Error while withdraw value in account!'));
+        if (verifyAccountExist.data.length <= 0) return Promise.reject(new Error('WIT_002 - Account not found! Make a deposit to activate your account!'));
+        
+        // VERIFY WITHDRAW LIMIT
+        if (value > 600.00) return Promise.reject(new Error('WIT_003 - Value exceeds the limit! Limit equal B$ 600, 00.'));
+        
+        const accountId = verifyAccountExist.data[0].id;
+        let oldBalance = verifyAccountExist.data[0].balance;
+        let withdraw = data.value + 0.30;
+        let newBalance = verifyAccountExist.data[0].balance - withdraw;
+
+        // VERIFY IF CURRENT BALANCE IS LESS THAN THE WITHDRAW AMOUNT
+        if (oldBalance < withdraw) return Promise.reject(new Error('WIT_005 - Your current balance is less than the withdrawal amount!'));
+        
+        // SAVE TRANSACTION REGISTER
+        const saveTransaction = await this.saveAccountTransaction(parseInt(accountId), value, 'withdraw', 0.30);
+        if (saveTransaction.error) return Promise.reject(new Error('WIT_006 - Error while withdraw value in account!'));
+        if (saveTransaction.data.affectedRows <= 0) return Promise.reject(new Error('WIT_007 - Error while withdraw value in account!'));
+
+        // UPDATE BALANCE IN ACCOUNT
+        const updateBalance = await this.updateAccountBalance(parseInt(accountId), newBalance, type);
+        if (updateBalance.error) return Promise.reject(new Error('DEP_008 - Error while withdraw value in account!'));
+        if (updateBalance.data.affectedRows <= 0) return Promise.reject(new Error('DEP_009 - Error while withdraw value in account!'));
+
+        return {
+            accountType: type === 'poupanca' ? 'Conta Poupança' : 'Conta Corrente',
+            account: account,
+            oldBalance: `B$ ${_.replace(oldBalance.toFixed(2), '.', ',')}`,
+            withdraw: `B$ ${_.replace(value.toFixed(2), '.', ',')}`,
+            discontedAmount: `B$ 0,30`,
+            balance: `B$ ${_.replace(newBalance.toFixed(2), '.', ',')}`
+        };
     }
 }
         
