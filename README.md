@@ -1,37 +1,35 @@
-# Backend Node.js <img src="https://www.moovin.com.br/assets/images/svg/logo2.svg" width="50">
+# Projeto Biteris
 
-### Desafio
+O projeto biteris tem o objetivo de desenvolver uma solução em formato de API com a utilização de node.js e Typescript, simulando o comportamento de um caixa eletrônico com operações de saque e depósito em Conta Corrente e de Conta Poupança.
 
-Desenvolver uma solução em formato de API com a utilização de node.js e Typescript.
+## Tecnologias utilizadas
 
-### Como realizar
+- Node.js
+- MySQL
+- Npm
 
-Faça o fork do repositório, realize os seus commits e ao final envie o link do seu repositório para o e-mail rh@moovin.com.br. Este repositório já possui uma base para iniciar o desenvolvimento, utilize-a como achar necessário. 
+## Dependências
 
 Para iniciar você deve instalar as dependências:
-```zsh
-  foo@bar:~$ npm i
+
 ```
-Em seguida você poderá executar exemplos de utilização do sistema criado através do comando:
-```zsh
-  foo@bar:~$ npm run dev
+npm i
 ```
 
-### Instruções
+## Como executar este projeto
 
-Em um pequeno país do planeta Cyber, a moeda vigente é o biteris cuja sigla é B$.
+Para rodar este projeto:
 
-Você precisa desenvolver um algoritmo para um caixa eletrônico, seguindo os requisitos descritos abaixo:
+- É necessário criar um banco e dados "biteris".
+- Atualizar o arquido database.json que se encontra na pasta "src" com as configurações de acesso ao banco de dados mysql.
+- Atualizar o arquivo env que se encontra na pasta "src/config" com as configurações de acesso ao banco de dados mysql.
 
-- O banco possui dois tipos de conta: Conta Corrente e Conta Poupança;
-- Limite de Saque: B$ 600,00;
-- Cada operação de Saque possui uma taxa de operação que deve ser descontado do saldo: B$ 0,30;
-- O recurso de Depósito deve receber um código de conta e o valor a ser depositado;
-- O recurso de Saque deve receber um código de conta e o valor a ser retirado além de validar se a conta possui saldo e se o valor não excede o limite;
+- Executar os seguintes comandos:
 
-> **ATENÇÃO**: Não é necessário realizar interação com banco de dados (opcional).
+```
+cd src
+db-migrate up --config database.json -e
+npm run dev
+```
 
-### Dúvidas
-
-Em caso de dúvida entre em contato pelo skype **matheusmoovin**
-
+O acesso para desenvolvimento pode ser efetuado através do link: http://localhost:5000
