@@ -1,6 +1,6 @@
 # Projeto Biteris
 
-O projeto biteris tem o objetivo de desenvolver uma solução em formato de API com a utilização de node.js e Typescript, simulando o comportamento de um caixa eletrônico com operações de saque e depósito em Conta Corrente e de Conta Poupança.
+O projeto biteris tem o objetivo de desenvolver uma solução em formato de API com a utilização de node.js e Typescript, simulando o comportamento de um caixa eletrônico com operações de saque e depósito em Conta Corrente e Conta Poupança.
 
 ## Tecnologias utilizadas
 
