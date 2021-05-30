@@ -43,14 +43,14 @@ http://localhost:5000/conta-corrente/depositar
 http://localhost:5000/conta-poupanca/depositar
 ```
 
-- Rotas para saque em conta corrent e conta poupança:
+- Rotas para saque em conta corrente e conta poupança:
 
 ```
 http://localhost:5000/conta-corrente/sacar
 http://localhost:5000/conta-poupanca/sacar
 ```
 
-As rotas devem utilizar o método POST, passando um objeto JSON no corpo da requisição no seguinte formato:
+As rotas devem utilizar o método POST, passando um objeto JSON no corpo da requisição. O objeto deve estar de acordo com o seguinte formato:
 
 ```
 {
